@@ -8,11 +8,11 @@ const HOSTED_URLS = {
 
 const examples = {
   'example1':
-      'Alice was beginning to get very tired of sitting by her sister on the bank.',
-  'example2':
       'Buda-Pesth seems a wonderful place.',
+  'example2':
+      'The Port of London held a high position from the beginning of the history of Western Europe.',
   'example3':
-      'Scepticism was as much the result of knowledge, as knowledge is of scepticism.'      
+      'Clare knew him at once, Crushe having been the second lieutenant of his last ship, and as such having twice endeavoured to get him flogged.'
 };
 
 function status(statusText) {
