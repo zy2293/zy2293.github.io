@@ -8,7 +8,7 @@ const HOSTED_URLS = {
 
 const examples = {
   'example1':
-      'Buda-Pesth seems a wonderful place.',
+      '_3 May. Bistritz._--Left Munich at 8:35 P. M., on 1st May.',
   'example2':
       'The Port of London held a high position from the beginning of the history of Western Europe.',
   'example3':
