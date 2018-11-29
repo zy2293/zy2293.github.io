@@ -22,7 +22,7 @@ USER_NAME = "zy2293"
 USER_EMAIL = "zy2293@columbia.edu" 
 
 # the user token you've created (see the lecture 8 slides for instructions)
-TOKEN = "5be437ac858dec0bf496ab7d1dfe58df0f7c8624" 
+TOKEN = "34b82bdf21fa201df7e6f2e9706b40938ffabafd" 
 
 # site name
 # for example, if my user_name is "foo", then this notebook will create
@@ -79,15 +79,9 @@ if not os.path.exists(MODEL_DIR):
   os.mkdir(MODEL_DIR)
 
 
-# In[8]:
-
-
-MODEL_DIR
-
-
 # As an example, we will create and vectorize a few documents. (Check out https://www.gutenberg.org/ for a bunch of free e-books.)
 
-# In[114]:
+# In[8]:
 
 
 # read in first 1000 sentences from Alice in Wonderland
@@ -121,7 +115,7 @@ def read_books(url, starting_sent):
         return sentences
 
 
-# In[117]:
+# In[9]:
 
 
 # Dracula
@@ -130,7 +124,7 @@ start_line = "_3 May. Bistritz._--Left Munich at 8:35 P. M., on 1st May"
 dracula = read_books(dracula_url, start_line)
 
 
-# In[119]:
+# In[10]:
 
 
 # Tower of London
@@ -139,7 +133,7 @@ start_line = "The Tower of London is the most interesting fortress in Great"
 tower_of_london = read_books(tower_url, start_line)
 
 
-# In[121]:
+# In[11]:
 
 
 # Blue Jacket
@@ -148,7 +142,7 @@ start_line = "The big bell of Woolwich Dockyard had just commenced its"
 blue_jacket = read_books(jacket_url, start_line)
 
 
-# In[123]:
+# In[12]:
 
 
 all_books = dracula
@@ -156,9 +150,10 @@ all_books.extend(tower_of_london)
 all_books.extend(blue_jacket)
 
 
-# In[213]:
+# In[13]:
 
 
+import numpy as np
 x_train = all_books
 y_train = np.zeros(len(x_train))
 # 0: Dracula; 1: Tower of London; 2: Blue Jacket
@@ -168,7 +163,7 @@ y_train[2000:] = 2
 
 # Tokenize the documents, create a word index (word -> number).
 
-# In[214]:
+# In[14]:
 
 
 max_len = 100
@@ -179,7 +174,7 @@ t = Tokenizer(num_words=num_words)
 t.fit_on_texts(x_train)
 
 
-# In[215]:
+# In[15]:
 
 
 len(t.word_index)
@@ -187,7 +182,7 @@ len(t.word_index)
 
 # Here's how we vectorize a document.
 
-# In[216]:
+# In[16]:
 
 
 vectorized = t.texts_to_sequences(dracula)
@@ -196,14 +191,14 @@ vectorized = t.texts_to_sequences(dracula)
 
 # Apply padding if necessary.
 
-# In[217]:
+# In[17]:
 
 
 from keras.preprocessing.sequence import pad_sequences
 padded = pad_sequences(vectorized, maxlen=max_len, padding='post')
 
 
-# In[218]:
+# In[18]:
 
 
 print(padded)
@@ -211,7 +206,7 @@ print(padded)
 
 # We will save the word index in metadata. Later, we'll use it to convert words typed in the browser to numbers for prediction.
 
-# In[219]:
+# In[19]:
 
 
 metadata = {
@@ -223,20 +218,19 @@ metadata = {
 
 # Define a model.
 
-# In[267]:
+# In[75]:
 
 
 embedding_size = 20
 n_classes = 3
-epochs = 15
+epochs = 20
 
 import keras
 model = keras.Sequential()
 model.add(keras.layers.Embedding(num_words, embedding_size, input_shape=(max_len,)))
 #model.add(keras.layers.Flatten())
-model.add(keras.layers.LSTM(128, return_sequences=True))
-model.add(keras.layers.LSTM(32, return_sequences=False))
-#model.add(keras.layers.Dense(32, activation = 'relu'))
+model.add(keras.layers.LSTM(64, return_sequences=True))
+model.add(keras.layers.LSTM(16, return_sequences=False))
 model.add(keras.layers.Dense(3, activation='softmax'))
 model.compile('rmsprop', 'sparse_categorical_crossentropy', metrics=['accuracy'])
 model.summary()
@@ -244,7 +238,7 @@ model.summary()
 
 # Prepare some training data.
 
-# In[221]:
+# In[21]:
 
 
 x_train = t.texts_to_sequences(x_train)
@@ -252,7 +246,7 @@ x_train = pad_sequences(x_train, maxlen=max_len, padding='post')
 print(x_train)
 
 
-# In[268]:
+# In[76]:
 
 
 model.fit(x_train, y_train, epochs=epochs)
@@ -260,27 +254,26 @@ model.fit(x_train, y_train, epochs=epochs)
 
 # Demo using the model to make predictions.
 
-# In[265]:
+# In[100]:
 
 
-test_example = "Left Munich at 8:35 P. M., on 1st May, arriving at Vienna early next morning."
+test_example = "_3 May. Bistritz._--Left Munich at 8:35 P. M., on 1st May"
 x_test = t.texts_to_sequences([test_example])
 x_test = pad_sequences(x_test, maxlen=max_len, padding='post')
 print(x_test)
 
 
-# In[269]:
+# In[101]:
 
 
 preds = model.predict(x_test)
 print(preds)
-import numpy as np
 print(np.argmax(preds))
 
 
 # Convert the model
 
-# In[270]:
+# In[102]:
 
 
 import json
@@ -294,7 +287,7 @@ print('\nSaved model artifcats in directory: %s' % MODEL_DIR)
 
 # Write an index.html and an index.js file configured to load our model.
 
-# In[271]:
+# In[103]:
 
 
 index_html = """
@@ -347,7 +340,7 @@ index_html = """
 """
 
 
-# In[272]:
+# In[109]:
 
 
 index_js = """
@@ -360,7 +353,7 @@ const HOSTED_URLS = {
 
 const examples = {
   'example1':
-      'Buda-Pesth seems a wonderful place.',
+      '_3 May. Bistritz._--Left Munich at 8:35 P. M., on 1st May.',
   'example2':
       'The Port of London held a high position from the beginning of the history of Western Europe.',
   'example3':
@@ -513,7 +506,7 @@ setup();
 """
 
 
-# In[273]:
+# In[110]:
 
 
 with open('index.html','w') as f:
@@ -523,7 +516,7 @@ with open('index.js','w') as f:
   f.write(index_js)
 
 
-# In[274]:
+# In[111]:
 
 
 get_ipython().system('ls')
@@ -531,7 +524,7 @@ get_ipython().system('ls')
 
 # Commit and push everything. Note: we're storing large binary files in GitHub, this isn't ideal (if you want to deploy a model down the road, better to host it in a cloud storage bucket).
 
-# In[276]:
+# In[112]:
 
 
 get_ipython().system('git add . ')
@@ -541,7 +534,7 @@ get_ipython().system('git push https://{USER_NAME}:{TOKEN}@github.com/{USER_NAME
 
 # All done! Hopefully everything worked. You may need to wait a few moments for the changes to appear in your site. If not working, check the JavaScript console for errors (in Chrome: View -> Developer -> JavaScript Console).
 
-# In[277]:
+# In[113]:
 
 
 print("Now, visit https://%s.github.io/%s/" % (USER_NAME, SITE_NAME))
